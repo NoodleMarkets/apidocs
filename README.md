@@ -163,7 +163,7 @@ Parameters:
 
 Example:
 
-```
+```xml
 <Index loadmode="Incremental">
   <SupplierID>28</SupplierID>
   <IndexItem>
@@ -208,6 +208,7 @@ Use `<IndexItemAdd>` to add an item to the catalog.
 
 Definition:
 
+```xml
 <IndexItem>
   <IndexItemAdd>
     <ItemID/>
@@ -218,6 +219,7 @@ Definition:
     </IndexItemDetail>
   </IndexItemAdd>
 </IndexItem>
+```
 
 Parameters:
 
