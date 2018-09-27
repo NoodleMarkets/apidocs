@@ -478,8 +478,8 @@ Example:
 
 ### OrderRequest:
 
-`<OrderRequest>` must contain both and `<OrderRequestHeader`>
-and at least one `<ItemOut>` describing a line item in a purchase order.
+`<OrderRequest>` will contain both an `<OrderRequestHeader>` and at least one
+`<ItemOut>` describing a line item in a purchase order.
 
 Definition:
 
@@ -621,4 +621,176 @@ Example:
     <SupplierPartID>PK12-835644</SupplierPartID>
   </ItemID>
 </ItemOut>
+```
+
+## Confirming an order:
+
+To confirm an order has been accepted for processing, suppliers should submit
+a ConfirmationRequest to the cXML request handler.
+
+Request format:
+
+```xml
+<cXML>
+  <!-- cXML request header -->
+  <Request>
+    <ConfirmationRequest/>
+  </Request>
+</cXML>
+<!-- MIME attachment -->
+```
+
+Example:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cXML SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd">
+<cXML timestamp="2018-09-27T16:56:03-08:00" payloadID="66654321@procurek12.com">
+  <Header>
+    <Sender>
+      <Credential domain="DUNS">
+        <Identity><!-- your pk12 API username --></Identity>
+        <SharedSecret><!-- your pk12 API secret --></SharedSecret>
+      </Credential>
+    </Sender>
+  </Header>
+  <Request>
+    <ConfirmationRequest>
+      <ConfirmationHeader type="accept" />
+      <OrderReference orderID="60"/>
+    </ConfirmationRequest>
+  </Request>
+</cXML>
+```
+
+Response format:
+
+If accepted, the endpoint will return a standard cXML `<Response>` element with
+a 201 status code.
+
+```xml
+<Response>
+  <Status code="201" text="Accepted"/>
+</Response>
+```
+
+### ConfirmationRequest:
+
+Definition:
+
+```xml
+<ConfirmationRequest>
+  <ConfirmationHeader type="accept" />
+  <OrderReference orderID="XXXXX"/>
+</ConfirmationRequest>
+```
+
+Parameters:
+
+- ConfirmationHeader/@type: Currently only complete order acceptance
+    confirmations are allowed.  This value must be "accept".
+- OrderReference/@orderID: The order ID provided by in the original
+    OrderRequest.
+
+Example:
+
+```xml
+<ConfirmationRequest>
+  <ConfirmationHeader type="accept" />
+  <OrderReference orderID="60"/>
+</ConfirmationRequest>
+```
+
+## Providing shipping details:
+
+Once an order has shipped, supplier should submit a ShipNoticeRequest to the
+cXML request handler.
+
+RequestFormat:
+
+```xml
+<cXML>
+  <!-- cXML request header -->
+  <Request>
+    <ConfirmationRequest/>
+  </Request>
+</cXML>
+<!-- MIME attachment -->
+```
+
+Example:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cXML SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd">
+<cXML timestamp="2018-09-27T16:56:03-08:00" payloadID="66654321@procurek12.com">
+  <Header>
+    <Sender>
+      <Credential domain="DUNS">
+        <Identity><!-- your pk12 API username --></Identity>
+        <SharedSecret><!-- your pk12 API secret --></SharedSecret>
+      </Credential>
+    </Sender>
+  </Header>
+  <Request>
+    <ShipNoticeRequest>
+      <ShipControl>
+        <CarrierIdentifier domain="SCAC">FDE</CarrierIdentifier>
+        <ShipmentIdentifier>123 999999 5678</ShipmentIdentifier>
+      </ShipControl>
+      <ShipNoticePortion>
+        <OrderReference orderID="60"/>
+      </ShipNoticePortion>
+    </ShipNoticeRequest>
+  </Request>
+</cXML>
+```
+
+Response format:
+
+If accepted, the endpoint will return a standard cXML `<Response>` element with
+a 201 status code.
+
+```xml
+<Response>
+  <Status code="201" text="Accepted"/>
+</Response>
+```
+
+### ShipNoticeRequest:
+
+Definition:
+
+```xml
+<ShipNoticeRequest>
+  <ShipControl>
+    <CarrierIdentifier domain="SCAC"/>
+    <ShipmentIdentifier/>
+  </ShipControl>
+  <ShipNoticePortion>
+    <OrderReference orderID="XXXXXX"/>
+  </ShipNoticePortion>
+</ShipNoticeRequest>
+```
+
+Parameters:
+
+- ShipControl/CarrierIdentifier[@domain="SCAC"]: The shipping carrier's SCAC.
+    Currently only the "SCAC" domain is supported.
+- ShipControl/ShipmentIdentifier: Carrier-supplied shipment tracking number.
+- ShipNoticePortion/OrderReference/@orderID: The order ID provided in the
+    original OrderRequest.
+
+Example:
+
+```xml
+<ShipNoticeRequest>
+  <ShipControl>
+    <CarrierIdentifier domain="SCAC">FDE</CarrierIdentifier>
+    <ShipmentIdentifier>123 999999 5678</ShipmentIdentifier>
+  </ShipControl>
+  <ShipNoticePortion>
+    <OrderReference orderID="60"/>
+  </ShipNoticePortion>
+</ShipNoticeRequest>
 ```
